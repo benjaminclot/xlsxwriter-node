@@ -58,7 +58,7 @@ jobs:
           key: ${{ matrix.settings.target }}-cargo-${{ hashFiles('Cargo.lock') }}
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build
         # `npx` resolves the @napi-rs/cli bin from local node_modules (it is a
@@ -98,7 +98,7 @@ jobs:
         with:
           node-version: 26
       - name: Install dependencies
-        run: npm install
+        run: npm ci
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
@@ -127,7 +127,7 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
       - name: Install dependencies
-        run: npm install
+        run: npm ci
       - name: Generate loader and type definitions
         # index.js / index.d.ts are not committed. A single Linux build regenerates
         # them (both are platform-independent); the per-platform .node binaries come
