@@ -36,9 +36,9 @@ jobs:
     name: build - ${{ matrix.settings.target }}
     runs-on: ${{ matrix.settings.host }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 26
 
@@ -48,7 +48,7 @@ jobs:
           targets: ${{ matrix.settings.target }}
 
       - name: Cache cargo
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.cargo/registry/index/
@@ -67,7 +67,7 @@ jobs:
         shell: bash
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: bindings-${{ matrix.settings.target }}
           # Include the generated loader + types so the test job (which doesn't
@@ -93,14 +93,14 @@ jobs:
             target: x86_64-pc-windows-msvc
     runs-on: ${{ matrix.host }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
         with:
           node-version: 26
       - name: Install dependencies
         run: npm ci
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: bindings-${{ matrix.target }}
           path: .
@@ -119,8 +119,8 @@ jobs:
       contents: write # napi pre-publish creates a GitHub release with the binaries
       id-token: write # OIDC: npm trusted publishing + provenance (no token needed)
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
         with:
           node-version: 26
           # No registry-url/token: auth is via OIDC trusted publishing. The
@@ -138,7 +138,7 @@ jobs:
         # from the build matrix artifacts below. Debug build is enough for codegen.
         run: npx napi build --platform
       - name: Download all artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: artifacts
       - name: Create per-platform package dirs
