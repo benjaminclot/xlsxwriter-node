@@ -6,6 +6,17 @@
 
 import { readFileSync } from 'node:fs'
 import { inflateRawSync } from 'node:zlib'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+
+/**
+ * A writable, cross-platform output path for a test .xlsx (in the OS temp dir).
+ * Avoids `new URL(...).pathname`, which yields an invalid `/C:/...` path on
+ * Windows.
+ */
+export function xlsxPath(name) {
+  return join(tmpdir(), `xlsxwriter-node-${name}`)
+}
 
 const SIG_EOCD = 0x06054b50
 const SIG_CENTRAL = 0x02014b50

@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { zipEntries } from './helpers.mjs'
+import { zipEntries, xlsxPath } from './helpers.mjs'
 import { readFileSync, existsSync, rmSync } from 'node:fs'
 import { createRequire } from 'node:module'
 
@@ -35,7 +35,7 @@ test('adds a table with named columns and a totals row', () => {
 
   sheet.addTable(0, 0, 5, 1, table)
 
-  const outPath = new URL('./table-out.xlsx', import.meta.url).pathname
+  const outPath = xlsxPath('table-out.xlsx')
   if (existsSync(outPath)) rmSync(outPath)
   wb.save(outPath)
 

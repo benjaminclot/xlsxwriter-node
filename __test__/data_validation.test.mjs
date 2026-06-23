@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { zipRead } from './helpers.mjs'
+import { zipRead, xlsxPath } from './helpers.mjs'
 import { readFileSync, existsSync, rmSync } from 'node:fs'
 import { createRequire } from 'node:module'
 
@@ -25,7 +25,7 @@ test('applies numeric and list data validations', () => {
   const list = new DataValidation().allowList(['North', 'South', 'East', 'West'])
   sheet.addDataValidation(2, 1, 2, 1, list)
 
-  const outPath = new URL('./dv-out.xlsx', import.meta.url).pathname
+  const outPath = xlsxPath('dv-out.xlsx')
   if (existsSync(outPath)) rmSync(outPath)
   wb.save(outPath)
 

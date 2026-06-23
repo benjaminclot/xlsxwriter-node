@@ -2,7 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync, existsSync, rmSync } from 'node:fs'
 import { createRequire } from 'node:module'
-import { zipEntries, zipRead } from './helpers.mjs'
+import { zipEntries, zipRead, xlsxPath } from './helpers.mjs'
 
 const require = createRequire(import.meta.url)
 const { Workbook, Chart, ChartType, ChartLegendPosition } = require('../index.js')
@@ -47,7 +47,7 @@ test('inserts a column chart with two series into the workbook', () => {
 
   sheet.insertChart(5, 1, chart)
 
-  const outPath = new URL('./chart-out.xlsx', import.meta.url).pathname
+  const outPath = xlsxPath('chart-out.xlsx')
   if (existsSync(outPath)) rmSync(outPath)
   wb.save(outPath)
 

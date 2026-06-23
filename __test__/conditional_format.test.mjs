@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { zipRead } from './helpers.mjs'
+import { zipRead, xlsxPath } from './helpers.mjs'
 import { readFileSync, rmSync } from 'node:fs'
 import { createRequire } from 'node:module'
 
@@ -48,7 +48,7 @@ test('applies conditional formats and produces a valid xlsx', () => {
   const bar = new ConditionalFormatDataBar().setFillColor(0x638ec6).setSolidFill(true)
   sheet.addConditionalFormatDataBar(0, 1, 9, 1, bar)
 
-  const outPath = new URL('./cf-out.xlsx', import.meta.url).pathname
+  const outPath = xlsxPath('cf-out.xlsx')
   wb.save(outPath)
 
   const bytes = readFileSync(outPath)

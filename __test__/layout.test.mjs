@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { zipRead } from './helpers.mjs'
+import { zipRead, xlsxPath } from './helpers.mjs'
 import { readFileSync, rmSync } from 'node:fs'
 import { createRequire } from 'node:module'
 
@@ -43,7 +43,7 @@ test('page setup, autofilter, properties and notes', () => {
   const note = new Note('Top performer').setAuthor('Ada').setVisible(true)
   sheet.insertNote(1, 1, note)
 
-  const outPath = new URL('./layout-out.xlsx', import.meta.url).pathname
+  const outPath = xlsxPath('layout-out.xlsx')
   wb.save(outPath)
 
   const bytes = readFileSync(outPath)

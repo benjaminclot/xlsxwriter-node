@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { zipEntries } from './helpers.mjs'
+import { zipEntries, xlsxPath } from './helpers.mjs'
 import { readFileSync, existsSync, rmSync } from 'node:fs'
 import { createRequire } from 'node:module'
 
@@ -37,7 +37,7 @@ test('writes a styled workbook to disk and buffer', () => {
   sheet.writeFormula(5, 1, '=SUM(B3:B3)')
   sheet.setColumnWidth(0, 20)
 
-  const outPath = new URL('./out.xlsx', import.meta.url).pathname
+  const outPath = xlsxPath('smoke-out.xlsx')
   if (existsSync(outPath)) rmSync(outPath)
   wb.save(outPath)
 
