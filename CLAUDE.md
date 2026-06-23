@@ -136,3 +136,32 @@ ci: run tests via npm test (no shell glob)
 ```
 
 Keep the `Co-Authored-By` trailer on agent-made commits.
+
+## Versioning
+
+This package's version **tracks the wrapped `rust_xlsxwriter`'s `MAJOR.MINOR`, and
+owns the `PATCH`**:
+
+```
+package version = 0.<rust_xlsxwriter-minor>.<our-release-counter>
+```
+
+- All our own releases (coverage, fixes, docs) bump the **patch**: `0.95.3 → 0.95.4`.
+- Upgrading `rust_xlsxwriter` to a new minor resets the patch line:
+  `0.95.x → 0.96.0` (do this in the same change that bumps `Cargo.toml`).
+- We do **not** mirror upstream's patch. Our patch is an independent counter; the
+  exact wrapped upstream version (incl. its patch) lives in `Cargo.toml`/`Cargo.lock`
+  and the README — never in our version. So upstream releasing `0.95.1` causes no
+  collision with our `0.95.x`.
+
+Consequence: within a `0.95.x` line, semver can't distinguish feature vs. fix — every
+binding change is a patch bump. That's accepted under `0.x`. Reassess at `1.0`.
+
+**Guardrail:** the CI `version-check` job fails if `package.json`'s `major.minor` ≠
+`rust_xlsxwriter`'s `major.minor` (from `Cargo.lock`), and `publish` depends on it — so
+a misaligned tag cannot release. When you bump `rust_xlsxwriter`'s minor in
+`Cargo.toml`, you must bump `package.json` to match (`npm version`) in the same change,
+or CI will fail.
+
+Releasing: `npm version patch` (or set the new `0.<minor>.0` when upgrading upstream),
+then `git push && git push --tags`. The tag triggers the OIDC publish.

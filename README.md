@@ -120,6 +120,19 @@ npm run example -- path/to/out.xlsx  # or a path of your choice
   single-threaded (main-thread) use, matching normal Node usage. Do not share a
   `Workbook`/`Worksheet` across worker threads.
 
+## Versioning
+
+This package's version **tracks the wrapped `rust_xlsxwriter`'s `MAJOR.MINOR` and owns
+the `PATCH`**: `0.<rust_xlsxwriter-minor>.<release>`. So any `0.95.x` wraps
+`rust_xlsxwriter` 0.95; the next upstream minor moves the package to `0.96.0`.
+
+- The package's patch number is an independent release counter — it does **not** mirror
+  upstream's patch.
+- The exact wrapped `rust_xlsxwriter` version is pinned in `Cargo.toml` (and recorded in
+  `Cargo.lock`).
+- Because this is `0.x`, treat any release as potentially containing changes — pin a
+  version range accordingly.
+
 ## Architecture
 
 `rust_xlsxwriter` hands out worksheets as `&mut` references borrowed from the
