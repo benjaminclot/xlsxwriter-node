@@ -1,0 +1,147 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        settings:
+          - host: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            build: napi build --platform --release
+          - host: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
+            build: napi build --platform --release --target aarch64-unknown-linux-gnu --use-napi-cross
+          - host: macos-latest
+            target: x86_64-apple-darwin
+            build: napi build --platform --release --target x86_64-apple-darwin
+          - host: macos-latest
+            target: aarch64-apple-darwin
+            build: napi build --platform --release --target aarch64-apple-darwin
+          - host: windows-latest
+            target: x86_64-pc-windows-msvc
+            build: napi build --platform --release
+    name: build - ${{ matrix.settings.target }}
+    runs-on: ${{ matrix.settings.host }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.settings.target }}
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ matrix.settings.target }}-cargo-${{ hashFiles('Cargo.lock') }}
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: ${{ matrix.settings.build }}
+        shell: bash
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bindings-${{ matrix.settings.target }}
+          path: ${{ '*.node' }}
+          if-no-files-found: error
+
+  test:
+    name: test - ${{ matrix.host }}
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - host: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+          - host: macos-latest
+            target: aarch64-apple-darwin
+          - host: windows-latest
+            target: x86_64-pc-windows-msvc
+    runs-on: ${{ matrix.host }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm install
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: bindings-${{ matrix.target }}
+          path: .
+      - name: Test
+        run: node --test __test__/*.test.mjs
+
+  publish:
+    name: publish
+    runs-on: ubuntu-latest
+    needs: [build, test]
+    # Only publish on a version tag (e.g. v0.1.0).
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write # napi pre-publish creates a GitHub release with the binaries
+      id-token: write # for npm provenance
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org/
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+      - name: Install dependencies
+        run: npm install
+      - name: Generate loader and type definitions
+        # index.js / index.d.ts are not committed. A single Linux build regenerates
+        # them (both are platform-independent); the per-platform .node binaries come
+        # from the build matrix artifacts below. Debug build is enough for codegen.
+        run: napi build --platform
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Create per-platform package dirs
+        # npm/ is not committed; regenerate it from package.json so the version
+        # stays single-sourced in the root package.json.
+        run: napi create-npm-dirs
+      - name: Move artifacts into per-platform packages
+        run: npm run artifacts
+      - name: List npm packages
+        run: ls -R ./npm
+      - name: Publish
+        # prepublishOnly runs `napi pre-publish -t npm`, which publishes each
+        # per-platform package and rewrites optionalDependencies, then the main
+        # package is published.
+        run: npm publish --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
