@@ -117,17 +117,21 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     permissions:
       contents: write # napi pre-publish creates a GitHub release with the binaries
-      id-token: write # for npm provenance
+      id-token: write # OIDC: npm trusted publishing + provenance (no token needed)
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 26
-          registry-url: https://registry.npmjs.org/
+          # No registry-url/token: auth is via OIDC trusted publishing. The
+          # target registry comes from package.json `publishConfig.registry`.
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
       - name: Install dependencies
         run: npm ci
+      - name: Use an npm that supports OIDC trusted publishing
+        # Trusted publishing requires npm >= 11.5.1.
+        run: npm install -g npm@latest
       - name: Generate loader and type definitions
         # index.js / index.d.ts are not committed. A single Linux build regenerates
         # them (both are platform-independent); the per-platform .node binaries come
@@ -148,9 +152,11 @@ jobs:
       - name: Publish
         # prepublishOnly runs `napi pre-publish -t npm`, which publishes each
         # per-platform package and rewrites optionalDependencies, then the main
-        # package is published.
+        # package is published. Auth is OIDC trusted publishing (no NPM token);
+        # provenance is generated automatically, but we keep the flag explicit.
+        # Every package (main + per-platform) must have a trusted publisher
+        # configured on npmjs.com pointing at this repo + workflow.
         run: npm publish --access public --provenance
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          # Still needed for the GitHub release that napi pre-publish creates.
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
