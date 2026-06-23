@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { execFileSync } from 'node:child_process'
+import { zipRead } from './helpers.mjs'
 import { readFileSync, rmSync } from 'node:fs'
 import { createRequire } from 'node:module'
 
@@ -56,9 +56,7 @@ test('applies conditional formats and produces a valid xlsx', () => {
   assert.equal(bytes[1], 0x4b)
 
   // The sheet XML must contain a conditionalFormatting block.
-  const xml = execFileSync('unzip', ['-p', outPath, 'xl/worksheets/sheet1.xml'], {
-    encoding: 'utf8',
-  })
+  const xml = zipRead(outPath, 'xl/worksheets/sheet1.xml')
   assert.match(xml, /<conditionalFormatting/)
 
   rmSync(outPath)

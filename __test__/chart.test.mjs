@@ -1,21 +1,11 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { execFileSync } from 'node:child_process'
 import { readFileSync, existsSync, rmSync } from 'node:fs'
 import { createRequire } from 'node:module'
+import { zipEntries, zipRead } from './helpers.mjs'
 
 const require = createRequire(import.meta.url)
 const { Workbook, Chart, ChartType, ChartLegendPosition } = require('../index.js')
-
-/** List the entries inside an .xlsx (zip) file. */
-function zipEntries(path) {
-  return execFileSync('unzip', ['-Z1', path], { encoding: 'utf8' })
-}
-
-/** Read one entry's text out of an .xlsx (zip) file. */
-function zipRead(path, entry) {
-  return execFileSync('unzip', ['-p', path, entry], { encoding: 'utf8' })
-}
 
 function withData(sheet) {
   // Categories in column A, two value series in B and C.

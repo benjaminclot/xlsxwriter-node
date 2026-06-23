@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { execFileSync } from 'node:child_process'
+import { zipEntries } from './helpers.mjs'
 import { readFileSync, existsSync, rmSync } from 'node:fs'
 import { createRequire } from 'node:module'
 
@@ -48,7 +48,7 @@ test('writes a styled workbook to disk and buffer', () => {
   assert.ok(bytes.length > 1000, 'file should be non-trivial')
 
   // The central directory should list the worksheet XML part.
-  const names = execFileSync('unzip', ['-Z1', outPath], { encoding: 'utf8' })
+  const names = zipEntries(outPath)
   assert.match(names, /xl\/worksheets\/sheet1\.xml/)
 
   rmSync(outPath)

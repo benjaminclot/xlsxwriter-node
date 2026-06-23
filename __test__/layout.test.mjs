@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { execFileSync } from 'node:child_process'
+import { zipRead } from './helpers.mjs'
 import { readFileSync, rmSync } from 'node:fs'
 import { createRequire } from 'node:module'
 
@@ -51,15 +51,11 @@ test('page setup, autofilter, properties and notes', () => {
   assert.equal(bytes[1], 0x4b) // 'K'
 
   // The core properties part should carry the title.
-  const core = execFileSync('unzip', ['-p', outPath, 'docProps/core.xml'], {
-    encoding: 'utf8',
-  })
+  const core = zipRead(outPath, 'docProps/core.xml')
   assert.match(core, /Quarterly Report/)
 
   // The worksheet XML should carry an autoFilter and pageSetup/landscape.
-  const sheetXml = execFileSync('unzip', ['-p', outPath, 'xl/worksheets/sheet1.xml'], {
-    encoding: 'utf8',
-  })
+  const sheetXml = zipRead(outPath, 'xl/worksheets/sheet1.xml')
   assert.match(sheetXml, /autoFilter/)
   assert.match(sheetXml, /landscape/)
 

@@ -70,7 +70,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: bindings-${{ matrix.settings.target }}
-          path: ${{ '*.node' }}
+          # Include the generated loader + types so the test job (which doesn't
+          # build) can `require('../index.js')`. Both are platform-independent.
+          path: |
+            *.node
+            index.js
+            index.d.ts
           if-no-files-found: error
 
   test:

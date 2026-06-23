@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { execFileSync } from 'node:child_process'
+import { zipRead } from './helpers.mjs'
 import { readFileSync, existsSync, rmSync } from 'node:fs'
 import { createRequire } from 'node:module'
 
@@ -34,9 +34,7 @@ test('applies numeric and list data validations', () => {
   assert.equal(bytes[1], 0x4b)
 
   // The worksheet XML must contain dataValidation entries.
-  const xml = execFileSync('unzip', ['-p', outPath, 'xl/worksheets/sheet1.xml'], {
-    encoding: 'utf8',
-  })
+  const xml = zipRead(outPath, 'xl/worksheets/sheet1.xml')
   assert.match(xml, /dataValidation/)
 
   rmSync(outPath)

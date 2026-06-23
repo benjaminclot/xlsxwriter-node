@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { execFileSync } from 'node:child_process'
+import { zipEntries } from './helpers.mjs'
 import { readFileSync, existsSync, rmSync } from 'node:fs'
 import { createRequire } from 'node:module'
 
@@ -43,7 +43,7 @@ test('adds a table with named columns and a totals row', () => {
   assert.equal(bytes[0], 0x50) // 'P'
   assert.equal(bytes[1], 0x4b) // 'K'
 
-  const names = execFileSync('unzip', ['-Z1', outPath], { encoding: 'utf8' })
+  const names = zipEntries(outPath)
   assert.match(names, /xl\/tables\/table1\.xml/)
 
   rmSync(outPath)
