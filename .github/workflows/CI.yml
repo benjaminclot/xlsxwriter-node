@@ -105,7 +105,9 @@ jobs:
           name: bindings-${{ matrix.target }}
           path: .
       - name: Test
-        run: node --test __test__/*.test.mjs
+        # `npm test` runs `node --test`, which discovers __test__/*.test.mjs
+        # itself. Avoid a shell glob — PowerShell on Windows won't expand it.
+        run: npm test
 
   publish:
     name: publish
