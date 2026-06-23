@@ -61,7 +61,9 @@ jobs:
         run: npm install
 
       - name: Build
-        run: ${{ matrix.settings.build }}
+        # `npx` resolves the @napi-rs/cli bin from local node_modules (it is a
+        # devDependency, not installed globally on the runners).
+        run: npx ${{ matrix.settings.build }}
         shell: bash
 
       - name: Upload artifact
@@ -123,7 +125,7 @@ jobs:
         # index.js / index.d.ts are not committed. A single Linux build regenerates
         # them (both are platform-independent); the per-platform .node binaries come
         # from the build matrix artifacts below. Debug build is enough for codegen.
-        run: napi build --platform
+        run: npx napi build --platform
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
@@ -131,7 +133,7 @@ jobs:
       - name: Create per-platform package dirs
         # npm/ is not committed; regenerate it from package.json so the version
         # stays single-sourced in the root package.json.
-        run: napi create-npm-dirs
+        run: npx napi create-npm-dirs
       - name: Move artifacts into per-platform packages
         run: npm run artifacts
       - name: List npm packages
