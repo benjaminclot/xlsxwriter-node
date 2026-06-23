@@ -103,3 +103,36 @@ they are not optional and they must not drift from the actual `index.d.ts`:
 
 When in doubt, derive the surface from the generated `index.d.ts` so the docs and the
 showcase match what's actually exposed.
+
+## Commit conventions
+
+Use [Conventional Commits](https://www.conventionalcommits.org/) for every commit.
+
+Format: `type(optional-scope): summary` — imperative mood, lowercase summary, no
+trailing period. Add a body (blank line first) to explain the why when it isn't
+obvious; mark breaking changes with `!` after the type/scope (e.g. `feat!:`) and/or a
+`BREAKING CHANGE:` footer.
+
+Types used in this repo:
+
+- `feat` — a new binding feature / public API addition
+- `fix` — a bug fix
+- `docs` — README/COVERAGE/CLAUDE or other docs
+- `test` — tests only
+- `build` — Cargo/npm/deps, packaging, `package.json`
+- `ci` — GitHub Actions / workflow changes
+- `refactor`, `perf`, `chore` — as usual
+
+Suggested scopes: a module name (`chart`, `table`, `worksheet`, `format`, …),
+`ci`, `deps`, `examples`.
+
+Examples:
+
+```
+feat(chart): add data-label configuration
+fix(worksheet): clamp row/col to Excel limits
+docs(coverage): mark data validation as implemented
+ci: run tests via npm test (no shell glob)
+```
+
+Keep the `Co-Authored-By` trailer on agent-made commits.
